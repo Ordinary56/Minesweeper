@@ -1,9 +1,13 @@
 # min version
-cmake_minimum_required(CMAKE_VERSION 3.12)
+cmake_minimum_required(VERSION 3.12)
 # C99
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_C_EXTENSIONS False)
+
+# set exec to be built in bin
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # template
 project(
@@ -17,10 +21,8 @@ find_package(SDL3_image CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
 
 # grab header and source files
-file(GLOB_RECURSIVE SOURCE_FILES CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
-file(GLOB_RECURSIVE HEADER_FILES CONFIGURE_DEPENDS
-     "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
+file(GLOB SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+file(GLOB HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
 
 # compile
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
@@ -31,8 +33,8 @@ target_include_directories(${PROJECT_NAME}
                            PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
 # link against
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL_image::SDL_image
-                                              SDL_ttf::SDL_ttf)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image
+                                              SDL3_ttf::SDL3_ttf)
 
 # set compiler options and features
 
