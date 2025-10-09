@@ -1,5 +1,5 @@
 #define SDL_MAIN_USE_CALLBACKS
-#include "../lib/core.h"
+#include "../lib/core/core.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
@@ -37,6 +37,9 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *e) {
 SDL_AppResult SDL_AppIterate(void *appstate) {
   AppState *state = appstate;
   render_update(&state->renderState);
+
+  // 60 FPS
+  SDL_Delay(16);
   return SDL_APP_CONTINUE;
 }
 

@@ -1,7 +1,7 @@
-#include "../lib/render.h"
+#include "../lib/gui/render.h"
 
 bool render_init(RenderState *renderState) {
-  renderState->window = SDL_CreateWindow("TITLE", 600, 800, 0);
+  renderState->window = SDL_CreateWindow(WINDOW_TITLE, WIDTH, HEIGHT, 0);
   if (!renderState->window) {
     return false;
   }
@@ -15,39 +15,33 @@ bool render_init(RenderState *renderState) {
   }
 
   renderState->font =
-      TTF_OpenFont("/usr/share/fonts/TTF/OpenSans-Bold.ttf", 32);
+      TTF_OpenFont("/usr/share/fonts/TTF/OpenSans-Bold.ttf", 32.0f);
   if (!renderState->font) {
+    return false;
   }
+
+  renderState->render_func_count = 0;
   return true;
 }
 
 void render_update(RenderState *renderState) {
   SDL_RenderClear(renderState->renderer);
-  SDL_Texture *texture = NULL;
-  SDL_Surface *text =
-      TTF_RenderText_Blended(renderState->font, "Hello World!", 0,
-                             (SDL_Color){255, 255, 255, SDL_ALPHA_OPAQUE});
-  if (text) {
-    texture = SDL_CreateTextureFromSurface(renderState->renderer, text);
-  } else {
-    SDL_Log("Failed to create text from surface: %s", SDL_GetError());
+  for (size_t i = 0; i < MAX_RENDER_FUNCTIONS; i++) {
+    renderState->render_funcs[i](renderState->renderer);
   }
-  SDL_DestroySurface(text);
-  SDL_RenderTexture(renderState->renderer, texture, NULL,
-                    &(SDL_FRect){.h = 400, .w = 800, .x = 100, .y = 100});
   SDL_RenderPresent(renderState->renderer);
 }
 
 void render_cleanup(RenderState *renderState) {
+  if (renderState->font) {
+    TTF_CloseFont(renderState->font);
+    TTF_Quit();
+  }
+
   if (renderState->renderer) {
     SDL_DestroyRenderer(renderState->renderer);
   }
   if (renderState->window) {
     SDL_DestroyWindow(renderState->window);
-  }
-
-  if (renderState->font) {
-    TTF_CloseFont(renderState->font);
-    TTF_Quit();
   }
 }
