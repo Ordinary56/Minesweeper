@@ -1,12 +1,12 @@
 #include "../lib/gui/render.h"
 
-bool render_init(RenderState *renderState) {
-  renderState->window = SDL_CreateWindow(WINDOW_TITLE, WIDTH, HEIGHT, 0);
-  if (!renderState->window) {
+bool render_init(RenderContext *rs) {
+  rs->window = SDL_CreateWindow(WINDOW_TITLE, WIDTH, HEIGHT, 0);
+  if (!rs->window) {
     return false;
   }
-  renderState->renderer = SDL_CreateRenderer(renderState->window, NULL);
-  if (!renderState->renderer) {
+  rs->renderer = SDL_CreateRenderer(rs->window, NULL);
+  if (!rs->renderer) {
     return false;
   }
 
@@ -14,34 +14,45 @@ bool render_init(RenderState *renderState) {
     return false;
   }
 
-  renderState->font =
+  rs->font =
       TTF_OpenFont("/usr/share/fonts/TTF/OpenSans-Bold.ttf", 32.0f);
-  if (!renderState->font) {
+  if (!rs->font) {
     return false;
   }
 
-  renderState->render_func_count = 0;
+  rs->callback_count = 0;
   return true;
 }
 
-void render_update(RenderState *renderState) {
-  SDL_RenderClear(renderState->renderer);
-  for (size_t i = 0; i < MAX_RENDER_FUNCTIONS; i++) {
-    renderState->render_funcs[i](renderState->renderer);
+void render_add_to_list(RenderContext *rs, RenderCallback callback) {
+  if(rs->callback_count  < MAX_RENDER_CALLBACKS) {
+      rs->callbacks[rs->callback_count++] = callback;
   }
-  SDL_RenderPresent(renderState->renderer);
+  else {
+      SDL_Log("Warning: Render list is full\n");
+    
+  }
+
 }
 
-void render_cleanup(RenderState *renderState) {
-  if (renderState->font) {
-    TTF_CloseFont(renderState->font);
+void render_update(RenderContext *rs) {
+  SDL_RenderClear(rs->renderer);
+  for (size_t i = 0; i < rs->callback_count; i++) {
+    rs->callbacks[i].func(rs->renderer, rs->callbacks[i].userdata);
+  }
+  SDL_RenderPresent(rs->renderer);
+}
+
+void render_cleanup(RenderContext *rs) {
+  if (rs->font) {
+    TTF_CloseFont(rs->font);
     TTF_Quit();
   }
 
-  if (renderState->renderer) {
-    SDL_DestroyRenderer(renderState->renderer);
+  if (rs->renderer) {
+    SDL_DestroyRenderer(rs->renderer);
   }
-  if (renderState->window) {
-    SDL_DestroyWindow(renderState->window);
+  if (rs->window) {
+    SDL_DestroyWindow(rs->window);
   }
 }

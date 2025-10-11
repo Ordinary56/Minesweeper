@@ -1,5 +1,9 @@
 #pragma once
-#include "timer.h"
+
+#include <SDL3/SDL_render.h>
+
+
+static const size_t CELL_SIZE = 32;
 
 enum CURRENT_GAME_STATE {
   STOPPED = 0,
@@ -15,28 +19,26 @@ typedef struct Cell {
   int val;
 
   bool flagged;
+
 } Cell;
 
-typedef struct GameState {
+typedef struct GameContext {
   Cell **grid;
   int row, col;
   int placed_mines;
   enum CURRENT_GAME_STATE current_state;
-} GameState;
+} GameContext;
 
-// Initalizes the gamestate to it's default values
-void game_init_default(GameState *gameState);
+void game_init_default(GameContext *context);
 
-// Initializes the grid
-bool game_init_grid(GameState *gameState);
+bool game_create_grid(GameContext *context);
 
-// places mines on the grid
-void game_place_mines(GameState *gameState);
+void game_place_mines(GameContext *context, int num);
 
-void flood_fill();
+void game_flood_fill(GameContext* context);
 
-// update logic, called every frame
-void game_update(GameState *gameState);
+void game_update(GameContext *context, void* data);
 
-// cleanup function. Used for freeing up the grid
-void game_cleanup(GameState *gameState);
+void game_draw_grid(SDL_Renderer* renderer, void* userdata);
+
+void game_cleanup(GameContext *context);

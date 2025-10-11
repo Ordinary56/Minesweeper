@@ -1,23 +1,34 @@
 #pragma once
 
+// Includes
 #include <SDL3/SDL_render.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+// Constants
 #define WINDOW_TITLE "MINESWEEPER"
-#define WIDTH 600
-#define HEIGHT 800
+#define MAX_RENDER_CALLBACKS 64
+static const int WIDTH = 600;
+static const int HEIGHT = 800;
 
-#define MAX_RENDER_FUNCTIONS 64
+typedef void (*RenderFunc)(SDL_Renderer* renderer, void* userdata);
 
-typedef struct RenderState {
+typedef struct RenderCallback {
+  RenderFunc func; 
+  void* userdata;
+} RenderCallback;
+
+typedef struct RenderContext {
   SDL_Window *window;
   SDL_Renderer *renderer;
   TTF_Font *font;
-  void (*render_funcs[MAX_RENDER_FUNCTIONS])(SDL_Renderer*);
-  int render_func_count;
+  RenderCallback callbacks[MAX_RENDER_CALLBACKS];
+  size_t callback_count;
 
-} RenderState;
+} RenderContext;
 
-bool render_init(RenderState *renderState);
-void render_update(RenderState *renderState);
-void render_cleanup(RenderState *renderState);
+
+// Functions
+bool render_init(RenderContext *rs);
+void render_add_to_list(RenderContext *rs, RenderCallback callback);
+void render_update(RenderContext *rs);
+void render_cleanup(RenderContext *rs);

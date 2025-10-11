@@ -3,8 +3,8 @@
 #include "timer.h"
 #include "../gui/render.h"
 typedef struct AppState {
-  GameState gameState;
-  RenderState renderState;
+  GameContext gameContext;
+  RenderContext renderContext;
   Timer timer;
 } AppState;
 
