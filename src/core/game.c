@@ -1,5 +1,5 @@
-#include "../lib/core/game.h"
-#include "../lib/gui/render.h"
+#include "../../lib/core/game.h"
+#include "../../lib/gui/render.h"
 #include <SDL3/SDL_log.h>
 #include <stdlib.h>
 #include <time.h>
@@ -9,7 +9,6 @@ void game_init_default(GameContext *context) {
   context->row = 0, context->col = 0;
   context->placed_mines = 0;
   context->current_state = STOPPED;
-  // TODO: init timer
 }
 
 bool game_create_grid(GameContext *context) {
@@ -20,6 +19,10 @@ bool game_create_grid(GameContext *context) {
     context->grid[i] = malloc(context->col * sizeof(Cell));
     if (!context->grid[i])
       goto error;
+    for (size_t j = 0; j < context->col; j++) {
+      context->grid[i][j] =
+          (Cell){.val = 0, .flagged = false, .revealed = false};
+    }
   }
 
   return true;
@@ -29,17 +32,45 @@ error:
   return false;
 }
 
+int game_check_neighbours(GameContext *context, int row, int col) {
+  int mine_count = 0;
+
+  int dr[] = {-1, -1, -1, 0, 0, 1, 1, 1};
+  int dc[] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+  for (size_t k = 0; k < 8; k++) {
+    int nr = row + dr[k];
+    int nc = col + dc[k];
+    if (nr >= 0 && nr < context->row && nc >= 0 && nc < context->col) {
+      if (context->grid[nr][nc].val == -1) {
+        mine_count++;
+      }
+    }
+  }
+  return mine_count;
+}
+
 void game_place_mines(GameContext *context, int num) {
   srand(time(NULL));
   int randX = rand() % context->row;
   int randY = rand() % context->col;
   for (size_t i = 0; i < num; i++) {
-    context->grid[randX][randY] = (Cell){.flagged = false, .val = -1};
-    context->placed_mines++;
+    if (context->grid[randX][randY].val != -1) {
+      context->grid[randX][randY] =
+          (Cell){.flagged = false, .revealed = false, .val = -1};
+      context->placed_mines++;
+    }
+  }
+  // TODO:
+  //  - set all cells to a num where it tells how many neighbours are mines
+
+  for (size_t i = 0; i < context->row; i++) {
+    for (size_t j = 0; j < context->col; j++) {
+      Cell picked_cell = context->grid[i][j];
+      picked_cell.val = game_check_neighbours(context, i, j);
+    }
   }
 }
-
-
 
 void game_update(GameContext *context, void *data) {
 
@@ -52,17 +83,17 @@ void game_update(GameContext *context, void *data) {
 
   int selected_row = (int)(local_x / CELL_SIZE);
   int selected_col = (int)(local_y / CELL_SIZE);
+
   switch (context->current_state) {
   case STOPPED:
     return;
   case PLAYING:
-    // TODO: handle input logic here
     if (local_x < 0 || local_y < 0 || local_x >= context->row ||
         local_y >= context->col) {
       return;
     }
     Cell picked_cell = context->grid[selected_row][selected_col];
-
+    picked_cell.revealed = true;
     break;
   case WIN:
   case LOSE:
@@ -82,5 +113,3 @@ void game_cleanup(GameContext *context) {
     context->grid = NULL;
   }
 }
-
-void game_render(SDL_Renderer *renderer, void *data);

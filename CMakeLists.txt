@@ -1,17 +1,17 @@
 # min version
 cmake_minimum_required(VERSION 3.12)
+
 # C99
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED True)
 set(CMAKE_C_EXTENSIONS False)
 
 # set exec to be built in bin
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 # template
 project(
-  game
+  Minesweeper
   VERSION 0.1
   LANGUAGES C)
 
@@ -28,7 +28,6 @@ file(GLOB HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
 # include lib dir
-
 target_include_directories(${PROJECT_NAME}
                            PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 

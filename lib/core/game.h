@@ -2,15 +2,9 @@
 
 #include <SDL3/SDL_render.h>
 
-
 static const size_t CELL_SIZE = 32;
 
-enum CURRENT_GAME_STATE {
-  STOPPED = 0,
-  PLAYING,
-  WIN,
-  LOSE
-};
+enum CURRENT_GAME_STATE { STOPPED = 0, PLAYING, WIN, LOSE };
 
 typedef struct Cell {
   // 0 -> empty cell, used for flood fill
@@ -19,6 +13,7 @@ typedef struct Cell {
   int val;
 
   bool flagged;
+  bool revealed;
 
 } Cell;
 
@@ -35,10 +30,8 @@ bool game_create_grid(GameContext *context);
 
 void game_place_mines(GameContext *context, int num);
 
-void game_flood_fill(GameContext* context);
+void game_flood_fill(GameContext *context);
 
-void game_update(GameContext *context, void* data);
-
-void game_draw_grid(SDL_Renderer* renderer, void* userdata);
+void game_update(GameContext *context, void *data);
 
 void game_cleanup(GameContext *context);
