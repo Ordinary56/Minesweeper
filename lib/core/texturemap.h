@@ -5,12 +5,11 @@ typedef struct TextureMap {
   char **keys;
   SDL_Texture **values;
   size_t count;
+  size_t capacity;
 } TextureMap;
 
-void texturemap_init(TextureMap *map);
-
-void texturemap_append(TextureMap* map, const char* key, SDL_Renderer* renderer);
+void texturemap_init(TextureMap *map, SDL_Renderer *renderer);
 
 SDL_Texture *texturemap_get(const TextureMap *map, const char *key);
 
-void texturemap_cleanup(TextureMap* map);
+void texturemap_cleanup(TextureMap *map);

@@ -11,25 +11,22 @@
 
 static SDL_FPoint mouseCoord = {0};
 
-
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char **argv) {
   UNUSED_PARAM(argc);
   UNUSED_PARAM(argv);
   *appstate = malloc(sizeof(AppState));
   if (!(*appstate)) {
-    SDL_Log("[ main.c ] Failed to init appstate: %s",
-                 SDL_GetError());
+    SDL_Log("[ main.c ] Failed to init appstate: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
   AppState *state = *appstate;
 
-  if(!render_init(&state->renderContext)) {
+  if (!render_init(&state->renderContext)) {
     SDL_Log("[ main.c ] Failed to init RenderContext: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  texturemap_init(&state->map);
-  
+  texturemap_init(&state->map, state->renderContext.renderer);
   state->current_scene = NULL;
   scene_change_to(state, &main_menu_scene, &state->map);
   return SDL_APP_CONTINUE;
@@ -45,7 +42,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *e) {
       mouseCoord.x = e->button.x;
       mouseCoord.y = e->button.y;
     }
-      
+
     break;
   default:
     break;
@@ -56,7 +53,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *e) {
 SDL_AppResult SDL_AppIterate(void *appstate) {
   AppState *state = appstate;
   game_update(&state->gameContext, &mouseCoord);
-  if(state->current_scene->update != NULL) {
+  if (state->current_scene->update != NULL) {
     state->current_scene->update(&mouseCoord);
   }
   render_draw(&state->renderContext, state->current_scene);

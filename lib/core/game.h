@@ -1,10 +1,9 @@
 #pragma once
 
+#include "enums.h"
 #include <SDL3/SDL_render.h>
 
-static const size_t CELL_SIZE = 32;
-
-enum CURRENT_GAME_STATE { STOPPED = 0, PLAYING, WIN, LOSE };
+static const unsigned short CELL_SIZE = 32;
 
 typedef struct Cell {
   // 0 -> empty cell, used for flood fill
@@ -21,12 +20,12 @@ typedef struct GameContext {
   Cell **grid;
   int row, col;
   int placed_mines;
-  enum CURRENT_GAME_STATE current_state;
+  CURRENT_GAME_STATE current_state;
 } GameContext;
 
 void game_init_default(GameContext *context);
 
-bool game_create_grid(GameContext *context);
+bool game_create_grid(GameContext *context, GRID_SIZES grid_size);
 
 void game_place_mines(GameContext *context, int num);
 

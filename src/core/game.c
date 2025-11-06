@@ -11,7 +11,21 @@ void game_init_default(GameContext *context) {
   context->current_state = STOPPED;
 }
 
-bool game_create_grid(GameContext *context) {
+bool game_create_grid(GameContext *context, GRID_SIZES grid_size) {
+  switch (grid_size) {
+  case BEGINNER:
+    context->row = 9;
+    context->col = 9;
+    break;
+  case INTERMEDIATE:
+    context->row = 16;
+    context->col = 16;
+    break;
+  case EXPERT:
+    context->row = 30;
+    context->col = 16;
+    break;
+  }
   context->grid = malloc(context->row * sizeof(Cell *));
   if (!context->grid)
     goto error;
@@ -28,7 +42,7 @@ bool game_create_grid(GameContext *context) {
   return true;
 
 error:
-  SDL_Log("Failed to initialize grid! System ran out of memory!\n");
+  SDL_Log("[game.c] : Failed to initialize grid! System ran out of memory!\n");
   return false;
 }
 
@@ -94,6 +108,10 @@ void game_update(GameContext *context, void *data) {
     }
     Cell picked_cell = context->grid[selected_row][selected_col];
     picked_cell.revealed = true;
+    if (picked_cell.val == -1) {
+      context->current_state = LOSE;
+      break;
+    }
     break;
   case WIN:
   case LOSE:

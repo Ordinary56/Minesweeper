@@ -7,17 +7,18 @@
 static TextureMap *map_ref;
 void game_scene_init(void *data) { map_ref = data; }
 
-void game_scene_draw_gui(SDL_Renderer *renderer, void *data) {}
+void game_scene_draw_gui(SDL_Renderer *renderer, void *data) {
+
+  // TODO: finish implementing
+}
 
 static void game_scene_draw_cell(SDL_Renderer *renderer, Cell *cell, int r,
                                  int c) {
   SDL_Texture *texture;
   if (cell->flagged) {
     texture = texturemap_get(map_ref, "tile_hidden");
-  } else if (cell->revealed) {
-    texture = texturemap_get(map_ref, "tile_revealed");
   } else {
-    char filename[64];
+    char filename[16];
     snprintf(filename, sizeof(filename), "tile_%d", cell->val);
     texturemap_get(map_ref, filename);
   }

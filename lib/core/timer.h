@@ -5,7 +5,7 @@
 #define SEC_TO_MIN(x) (x * 60)
 
 typedef struct Timer {
-  int countdown;
+  Uint32 countdown;
   Uint32 last_time;
 } Timer;
 
