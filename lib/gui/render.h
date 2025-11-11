@@ -1,7 +1,6 @@
 #pragma once
 
 // Includes
-#include "scene.h"
 #include <SDL3/SDL_render.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -17,10 +16,9 @@ typedef struct RenderContext {
   SDL_Window *window;
   SDL_Renderer *renderer;
   TTF_Font *font;
-
 } RenderContext;
 
 // Functions
 bool render_init(RenderContext *rc);
-void render_draw(RenderContext *rc, Scene* scene);
+void render_draw(RenderContext *rc, void* scene);
 void render_cleanup(RenderContext *rc);

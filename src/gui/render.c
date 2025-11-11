@@ -1,4 +1,5 @@
 #include "../../lib/gui/render.h"
+#include "../../lib/gui/scene.h"
 
 bool render_init(RenderContext *rc) {
   rc->window = SDL_CreateWindow(WINDOW_TITLE, WIDTH, HEIGHT, 0);
@@ -23,9 +24,10 @@ bool render_init(RenderContext *rc) {
 }
 
 
-void render_draw(RenderContext *rc, Scene* scene) {
+void render_draw(RenderContext *rc, void* scene) {
+  Scene* sc = scene;
   SDL_RenderClear(rc->renderer);
-  scene->draw(rc->renderer, NULL);
+  sc->draw(rc, NULL);
   SDL_RenderPresent(rc->renderer);
 }
 

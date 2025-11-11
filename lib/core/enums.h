@@ -22,3 +22,9 @@ typedef enum TIMERS {
   MIN_25,
   MIN_30
 } TIMERS;
+
+typedef enum BUTTON_IDS {
+  BUTTON_ID_START = 0,
+  BUTTON_ID_GRID_SIZE,
+  BUTTON_ID_TIMER,
+} BUTTON_IDS;
