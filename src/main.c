@@ -1,6 +1,7 @@
 #define SDL_MAIN_USE_CALLBACKS
 
 #include "../lib/core/core.h"
+#include "../lib/core/utils.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <SDL3_image/SDL_image.h>
@@ -12,23 +13,33 @@
 static SDL_FPoint mouseCoord = {0};
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char **argv) {
+  // Unused parameters
   UNUSED_PARAM(argc);
   UNUSED_PARAM(argv);
+
+  // Appstate allocation
   *appstate = malloc(sizeof(AppState));
   if (!(*appstate)) {
-    SDL_Log("[ main.c ] Failed to init appstate: %s", SDL_GetError());
+    SDL_Log("[ main.c ] Failed to init AppState: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
   AppState *state = *appstate;
 
+  // Rendering
   if (!render_init(&state->renderContext)) {
     SDL_Log("[ main.c ] Failed to init RenderContext: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  texturemap_init(&state->map, state->renderContext.renderer);
+
+  // Texture and assets
+  texturemap_init(&state->map);
+  load_assets(&state->map);
+
+  // Scene 
   state->current_scene = NULL;
   scene_change_to(state, &main_menu_scene, &state->map);
+
   return SDL_APP_CONTINUE;
 }
 
@@ -56,6 +67,7 @@ SDL_AppResult SDL_AppIterate(void *appstate) {
   if (state->current_scene->update != NULL) {
     state->current_scene->update(&mouseCoord);
   }
+  state->current_scene->draw(&state->renderContext, &mouseCoord);
   render_draw(&state->renderContext, state->current_scene);
 
   // 60 FPS
