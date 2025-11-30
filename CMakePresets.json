@@ -1,0 +1,40 @@
+{
+	"version": 10,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 23,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "linux_x86_64",
+			"displayName": "Linux x86 (64 bit)",
+			"generator": "Ninja",
+			"binaryDir": "bin/linux/",
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/toolchains/toolchain-linux-x86_64.cmake",
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "windows_x86_64",
+			"displayName": "Windows x86 (64 bit) (MinGW)",
+			"generator": "Ninja",
+			"binaryDir": "bin/windows",
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/toolchains/toolchain-windows-x86_64.cmake",
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "build-linux",
+			"configurePreset": "linux_x86_64"
+		},
+		{
+			"name": "build-windows",
+			"configurePreset": "windows_x86_64"
+		}
+	]
+}

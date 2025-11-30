@@ -1,4 +1,5 @@
 #pragma once
+
 typedef enum GRID_SIZES {
   // 9x9
   BEGINNER = 0,
@@ -23,8 +24,3 @@ typedef enum TIMERS {
   MIN_30
 } TIMERS;
 
-typedef enum BUTTON_IDS {
-  BUTTON_ID_START = 0,
-  BUTTON_ID_GRID_SIZE,
-  BUTTON_ID_TIMER,
-} BUTTON_IDS;

@@ -1,14 +1,16 @@
 #pragma once
+#include "enums.h"
+#include <SDL3/SDL_atomic.h>
 #include <SDL3/SDL_timer.h>
 
-#define MIN_TO_SEC(x) (x / 60)
-#define SEC_TO_MIN(x) (x * 60)
+#define TO_MIN(x) (x * 60 * 1000)
+#define INTERVAL_TO_SECONDS(x) (x / 1000)
 
-typedef struct Timer {
-  Uint32 countdown;
-  Uint32 last_time;
-} Timer;
+typedef struct {
+  int remaining;
+} CountDownState;
 
-void timer_init(Timer* timer);
-void timer_tick(Timer* timer);
+void timer_init(TIMERS timer);
 
+int timer_get();
+void timer_destroy();

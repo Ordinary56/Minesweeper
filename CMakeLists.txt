@@ -21,8 +21,10 @@ find_package(SDL3_image CONFIG REQUIRED)
 find_package(SDL3_ttf CONFIG REQUIRED)
 
 # grab header and source files
-file(GLOB SOURCE_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
-file(GLOB HEADER_FILES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
+file(GLOB_RECURSE SOURCE_FILES CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
+file(GLOB_RECURSE HEADER_FILES CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
 
 # compile
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
@@ -31,7 +33,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 target_include_directories(${PROJECT_NAME}
                            PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 
-# link against
+# link against the SDL3 lib
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image
                                               SDL3_ttf::SDL3_ttf)
 
@@ -43,4 +45,4 @@ target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
 # -Wall -Wextra -Wpedantic
 target_compile_options(
   ${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra
-                          -Wpedantic>)
+                          >)

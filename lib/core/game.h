@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "timer.h"
 #include <SDL3/SDL_render.h>
 
 static const unsigned short CELL_SIZE = 32;
@@ -25,11 +26,15 @@ typedef struct GameContext {
 
 void game_init_default(GameContext *context);
 
+void game_set_state(GameContext *ctx, CURRENT_GAME_STATE state);
+
 bool game_create_grid(GameContext *context, GRID_SIZES grid_size);
+
+bool game_cell_in_bounds(GameContext *ctx, int r, int c);
 
 void game_place_mines(GameContext *context, int num);
 
-void game_flood_fill(GameContext *context);
+void game_flood_fill(GameContext *context, int r, int c);
 
 void game_update(GameContext *context, void *data);
 

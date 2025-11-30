@@ -1,86 +1,92 @@
-#include "../../lib/core/enums.h"
+
+#include "../../lib/gui/ui_element.h"
+#include "../../lib/core/core.h"
+#include "../../lib/core/utils.h"
 #include "../../lib/gui/render.h"
 #include "../../lib/gui/scene.h"
-#include "../../lib/gui/ui_element.h"
-#define MAX_BUTTONS 8 // 3 - grid size 3 - timer  2- start and exit button
+#include "../../lib/gui/ui_states.h"
+#include <stdlib.h>
+
+#define BUTTON(label, color, data, on_click)                                   \
+  button_create(label, color, data, on_click)
+
+#define RECT(x, y, w, h)                                                       \
+  (SDL_FRect) { x, y, w, h }
 
 // Global refs
-static TextureMap *map_ref = NULL;
-
-
-
-// UI state
-typedef struct UIState {
-
-  GRID_SIZES selected_grid_size;
-  TIMERS selected_timer;
-  UIButton buttons[MAX_BUTTONS];
-
-} UIState;
+static TextureList *map_ref = NULL;
+static SDL_FPoint *mouse_pos = NULL;
 
 // in-file global state
 static UIState ui_state;
 
-static void button_clicked(Uint8 id, UIButton *element) {
-  GRID_SIZES size;
-  TIMERS timer;
-  void *data = element->data;
-  switch (id) {
-  case BUTTON_ID_START:
-    break;
-  case BUTTON_ID_GRID_SIZE:
-    ui_state.selected_grid_size = *(GRID_SIZES *)data;
-    break;
-  case BUTTON_ID_TIMER:
-    ui_state.selected_timer = *(TIMERS *)data;
-    break;
+static void button_clicked(UIButton *element) {
+  if (element->on_click) {
+    element->on_click(element->data);
   }
 }
 
 void main_menu_init(void *data) {
   map_ref = data;
-  SDL_Color black_text = {.r = 0, .g = 0, .b = 0, .a = 255};
-  // Unrolled konstansok miatt
+  SDL_Log("Ui state is: %p", &ui_state);
   ui_state.buttons[0] =
-      button_create("Beginner", black_text, (GRID_SIZES *)BEGINNER);
-  ui_state.buttons[1] =
-      button_create("Intermediate", black_text, (GRID_SIZES *)INTERMEDIATE);
-  ui_state.buttons[1] =
-      button_create("Expert", black_text, (GRID_SIZES *)EXPERT);
-  ui_state.buttons[2] = button_create("Start", black_text, NULL);
-  ui_state.buttons[3] = button_create("Exit", black_text, NULL);
+      BUTTON("Beginner", SDL_COLOR_WHITE, &ui_state, button_set_grid_beginner);
+  ui_state.buttons[1] = BUTTON("Intermediate", SDL_COLOR_WHITE, &ui_state,
+                               button_set_grid_intermediate);
+  ui_state.buttons[2] =
+      BUTTON("Expert", SDL_COLOR_WHITE, &ui_state, button_set_grid_expert);
+  ui_state.buttons[3] =
+      BUTTON("15 Min", SDL_COLOR_WHITE, &ui_state, button_set_timer_15min);
+  ui_state.buttons[4] =
+      BUTTON("25 Min", SDL_COLOR_WHITE, &ui_state, button_set_timer_25min);
+  ui_state.buttons[5] =
+      BUTTON("25 Min", SDL_COLOR_WHITE, &ui_state, button_set_timer_30min);
+  ui_state.buttons[6] = BUTTON("Start", SDL_COLOR_WHITE, &ui_state, button_play);
+  ui_state.buttons[7] = BUTTON("Exit", SDL_COLOR_WHITE, NULL, button_exit);
+
+  SDL_Log("Buttons fully initialized, size: %ld", sizeof(ui_state.buttons)/sizeof(ui_state.buttons[0]));
+  for (size_t i = 0; i < MAX_BUTTONS; i++) {
+    button_set_pos(&ui_state.buttons[i], 100.0f, 100.0f * i, 150.0f, 150.0f);
+  }
 }
 
 void main_menu_update(void *input) {
-  SDL_FPoint *mouse_coord = input;
-
+  mouse_pos = input;
+  SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouse_pos->x, &mouse_pos->y);
   for (size_t i = 0; i < MAX_BUTTONS; i++) {
-    if (SDL_PointInRectFloat(mouse_coord, &ui_state.buttons[i].rect)) {
-      button_clicked(ui_state.buttons[i].id, &ui_state.buttons[i]);
+    if (SDL_PointInRectFloat(mouse_pos, &ui_state.buttons[i].rect)) {
+      SDL_SetCursor(App_get_pointer_cursor());
+      if (flags & SDL_BUTTON_LMASK) {
+        SDL_Log("Clicked button: %ld", i);
+        button_clicked(&ui_state.buttons[i]);
+      }
+    } else {
+      SDL_SetCursor(App_get_default_cursor());
     }
   }
 }
 
 void main_menu_draw(const RenderContext *rc, void *data) {
   for (size_t i = 0; i < MAX_BUTTONS; i++) {
-    // TODO:  render text, render buttons
-    SDL_Texture *texture = texturemap_get(map_ref, ui_state.buttons[i].label);
+    SDL_Texture *texture = texture_list_get(map_ref, ui_state.buttons[i].label);
     char *text = ui_state.buttons[i].label;
+    // if this text hasn't been added to the texture_list
     if (texture == NULL) {
-      SDL_Surface *surface = TTF_RenderText_Solid(rc->font, text, strlen(text),
-                                                  ui_state.buttons[i].color);
-      texture = SDL_CreateTextureFromSurface(rc->renderer, surface);
-      if (texture != NULL) {
-        texturemap_append(map_ref, text, texture);
-      }
-      texture->h = ui_state.buttons[i].rect.h;
-      texture->w = ui_state.buttons[i].rect.w;
+      texture_list_append_text(map_ref, rc->renderer, rc->font,
+                               ui_state.buttons[i]);
+      continue;
     }
     SDL_RenderTexture(rc->renderer, texture, NULL, &ui_state.buttons[i].rect);
   }
 }
 
-void main_menu_cleanup() { map_ref = NULL; }
+void main_menu_cleanup() {
+  map_ref = NULL;
+  mouse_pos = NULL;
+  for (size_t i = 0; i < MAX_BUTTONS; i++) {
+    free(ui_state.buttons[i].label);
+  }
+}
 
 Scene main_menu_scene = {.init = main_menu_init,
                          .update = main_menu_update,
