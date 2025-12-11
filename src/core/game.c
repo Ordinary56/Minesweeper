@@ -49,7 +49,9 @@ error:
 }
 
 void game_set_state(GameContext *ctx, CURRENT_GAME_STATE state) {
-  ctx->current_state = state;
+  if (ctx->current_state != state) {
+    ctx->current_state = state;
+  }
 }
 
 bool game_cell_in_bounds(GameContext *ctx, int r, int c) {
@@ -137,10 +139,10 @@ void game_update(GameContext *context, void *data) {
   if (context->current_state == STOPPED) {
     return;
   }
-  if (timer_get() <= 0 && context->current_state != STOPPED) {
-    timer_destroy();
-    context->current_state = LOSE;
-  }
+  // if (timer_get() <= 0 && context->current_state != STOPPED) {
+  //   timer_destroy();
+  //   context->current_state = LOSE;
+  // }
   SDL_FPoint *mouseCoords = data;
   SDL_MouseButtonFlags flags =
       SDL_GetMouseState(&mouseCoords->x, &mouseCoords->y);

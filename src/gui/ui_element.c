@@ -1,5 +1,6 @@
 #include "../../lib/gui/ui_element.h"
 #include "../../lib/core/core.h"
+#include "../../lib/core/utils.h"
 #include "../../lib/core/texture_list.h"
 #include "../../lib/gui/scene.h"
 #include "../../lib/gui/ui_states.h"
@@ -59,4 +60,17 @@ void button_play(void *data) {
 
 void button_exit(void *data) {
   App_quit(false);
+}
+
+void button_save_state(void *data) {
+  GameContext* game = data;
+  int time_left = timer_get();
+  save_game_state(game, time_left);
+}
+
+void button_load_game(void *data) {
+  GameContext* game = data;
+  int time_left = timer_get();
+  load_game_state(game, time_left);
+  scene_change_to(&game_scene, NULL);
 }

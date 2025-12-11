@@ -41,10 +41,11 @@ void main_menu_init(void *data) {
       BUTTON("25 Min", SDL_COLOR_WHITE, &ui_state, button_set_timer_25min);
   ui_state.buttons[5] =
       BUTTON("25 Min", SDL_COLOR_WHITE, &ui_state, button_set_timer_30min);
-  ui_state.buttons[6] = BUTTON("Start", SDL_COLOR_WHITE, &ui_state, button_play);
-  ui_state.buttons[7] = BUTTON("Exit", SDL_COLOR_WHITE, NULL, button_exit);
+  ui_state.buttons[6] = 
+    BUTTON("Load Last Game", SDL_COLOR_WHITE, App_get_gamecontext_mut(), button_load_game);
+  ui_state.buttons[7] = BUTTON("Start", SDL_COLOR_WHITE, &ui_state, button_play);
+  ui_state.buttons[8] = BUTTON("Exit", SDL_COLOR_WHITE, NULL, button_exit);
 
-  SDL_Log("Buttons fully initialized, size: %ld", sizeof(ui_state.buttons)/sizeof(ui_state.buttons[0]));
   for (size_t i = 0; i < MAX_BUTTONS; i++) {
     button_set_pos(&ui_state.buttons[i], 100.0f, 100.0f * i, 150.0f, 150.0f);
   }

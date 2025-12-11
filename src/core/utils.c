@@ -2,7 +2,9 @@
 #include "../../lib/core/texture_list.h"
 #include <SDL3_image/SDL_image.h>
 #include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
+
 #define ENUM_TO_STR(a) #a
 #define FILEPATH_MAX 128
 
@@ -48,14 +50,46 @@ void load_tile_nums(TextureList *list, RenderContext *ctx) {
   }
 }
 
-void upload_high_score(const char *name, int time, GRID_SIZES size) {
-  FILE *file = fopen("highscore.txt", "a");
+
+void save_game_state(GameContext *ctx, int timer_left) {
+  SDL_Log("Writing save file in state.bin");
+  FILE *file = fopen("state.bin", "wb");
   if (file == NULL) {
-    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to open highscore");
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to open game state file: %s",
+                 strerror(errno));
     return;
   }
-  char dest_str[64];
-  snprintf(dest_str, sizeof(dest_str), "%s - TIME: %d s - DIFFICULTY: %s", name, time, ENUM_TO_STR(size));
-  fprintf(file, dest_str);
+  fwrite(&ctx->row, sizeof(int), 1, file);
+  fwrite(&ctx->col, sizeof(int), 1, file);
+  fwrite(&ctx->placed_mines, sizeof(int), 1, file);
+  for (int i = 0; i < ctx->row; i++) {
+    fwrite(ctx->grid[i], sizeof(Cell), ctx->col, file);
+  }
+  fwrite(&timer_left, sizeof(int), 1, file);
+  fclose(file);
+}
+
+void load_game_state(GameContext *ctx, int time_left) {
+  SDL_Log("Reading save file in state.bin");
+  FILE *file = fopen("state.bin", "rb");
+
+  if (file == NULL) {
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to open game state file: %s",
+                 strerror(errno));
+    return;
+  }
+  fread(&ctx->row, sizeof(int), 1, file);
+  SDL_Log("Loaded row: %d", ctx->row);
+  fread(&ctx->col, sizeof(int), 1, file);
+  SDL_Log("Loaded col: %d", ctx->col);
+  ctx->grid = malloc(ctx->row * sizeof(Cell*));
+  for(int i = 0; i < ctx->row; i++) {
+    ctx->grid[i] = malloc(ctx->col * sizeof(Cell));
+  }
+  fread(&ctx->placed_mines, sizeof(int), 1, file);
+  SDL_Log("Loaded mines: %d", ctx->placed_mines);
+  for (int i = 0; i < ctx->row; i++) {
+    fread(ctx->grid[i], sizeof(Cell), ctx->col, file);
+  }
   fclose(file);
 }

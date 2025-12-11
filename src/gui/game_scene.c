@@ -7,23 +7,43 @@
 #include <SDL3_image/SDL_image.h>
 #include <stdio.h>
 
+static UIButton save_button;
+
 void game_scene_init(void *data) {
   UIState *state = data;
-  SDL_Log("Selected grid size, selected timer, %d, %d",
-          state->selected_grid_size, state->selected_timer);
+
+  save_button = button_create("Save Current game", SDL_COLOR_WHITE,
+                              App_get_gamecontext_mut(), button_save_state);
+  SDL_Log("Created save button");
+  button_set_pos(&save_button, 350.0f, 550.0f, 200.0f, 200.0f);
+  SDL_Log("Set save button pos");
+  texture_list_append_text(&App_get_mut()->map,
+                           App_get_rendercontext()->renderer,
+                           App_get_rendercontext()->font, save_button);
+  SDL_Log("Button text appeneded");
   game_set_state(App_get_gamecontext_mut(), PLAYING);
-  game_create_grid(App_get_gamecontext_mut(), state->selected_grid_size);
-  game_place_mines(App_get_gamecontext_mut(), 10);
-  timer_init(state->selected_timer);
+  if (state != NULL) {
+    SDL_Log("State is not null, setting default inits for game");
+    game_create_grid(App_get_gamecontext_mut(), state->selected_grid_size);
+    game_place_mines(App_get_gamecontext_mut(), 10);
+    timer_init(state->selected_timer);
+  }
+  SDL_Log("Game_Scene Init successful");
+  for (int i = 0; i < App_get_gamecontext()->row; i++) {
+    for (int j = 0; j < App_get_gamecontext()->col; j++) {
+      Cell cell = App_get_gamecontext()->grid[i][j];
+      SDL_Log("{.flagged = %d, .val = %d, .revealed = %d}", cell.flagged,
+              cell.val, cell.revealed);
+    }
+    SDL_Log("\n");
+  }
 }
 
 void game_scene_draw_gui(const RenderContext *ctx, void *data) {
   // static int last_seconds = -1;
   // static SDL_Texture *cached_tex = NULL;
   // static SDL_FRect dst = {.x = 15, .y = 15, .w = 300, .h = 100};
-
-  int seconds = INTERVAL_TO_SECONDS(timer_get());
-
+  // int seconds = INTERVAL_TO_SECONDS(timer_get());
   // if (seconds != last_seconds) {
   //   last_seconds = seconds;
 
@@ -43,7 +63,9 @@ void game_scene_draw_gui(const RenderContext *ctx, void *data) {
   // if (cached_tex) {
   //   SDL_RenderTexture(ctx->renderer, cached_tex, NULL, &dst);
   // }
-  SDL_Log("%d", seconds);
+  // SDL_Log("%d", seconds);
+  SDL_Texture *text = texture_list_get(&App_get()->map, save_button.label);
+  SDL_RenderTexture(ctx->renderer, text, NULL, &save_button.rect);
 }
 
 static void game_scene_draw_cell(SDL_Renderer *renderer, Cell *cell, int r,
@@ -83,12 +105,25 @@ void game_scene_draw(const RenderContext *rc, void *data) {
   game_scene_draw_grid(rc->renderer, data);
 }
 
-void game_scene_cleanup() { timer_destroy(); }
+void game_scene_update(void *data) {
+  SDL_FPoint *mouse_coord = data;
+  SDL_MouseButtonFlags flags =
+      SDL_GetMouseState(&mouse_coord->x, &mouse_coord->y);
+  bool left_clicked = (flags & SDL_BUTTON_LMASK);
+  if (SDL_PointInRectFloat(mouse_coord, &save_button.rect) && left_clicked) {
+    save_button.on_click(save_button.data);
+  }
+}
+
+void game_scene_cleanup() {
+  timer_destroy();
+  free(save_button.label);
+}
 
 Scene game_scene = {
 
     .init = game_scene_init,
-    .update = NULL,
+    .update = game_scene_update,
     .draw = game_scene_draw,
     .cleanup = game_scene_cleanup
 

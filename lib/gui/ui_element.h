@@ -20,6 +20,10 @@ void button_set_pos(UIButton* button, float x, float y, float w, float h);
 void button_play(void* data);
 void button_exit(void* data);
 
+
+void button_load_game(void* data);
+void button_save_state(void* data);
+
 void button_set_grid_beginner(void* data);
 void button_set_grid_intermediate(void* data);
 void button_set_grid_expert(void* data);

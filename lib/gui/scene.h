@@ -18,3 +18,4 @@ void scene_change_to(Scene *newScene, void *data);
 
 extern Scene main_menu_scene;
 extern Scene game_scene;
+extern Scene highscore_scene;
